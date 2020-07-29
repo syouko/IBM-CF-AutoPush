@@ -1,0 +1,90 @@
+name: IBM Cloud Foundry Auto Push
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    - cron: '0 21 * * 0'
+
+jobs:
+  ibm-cf-autoPush:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: make Files
+      run: |
+        mkdir Godeps v2ray && cd v2ray
+        
+        wget -q https://github.com/v2ray/v2ray-core/releases/latest/download/v2ray-linux-64.zip
+        unzip -qo v2ray-linux-64.zip "v2ray" "v2ctl" && chmod -R 777 * && touch `date +%Y%m%d%H%M%S`
+        
+        cat > config.json << EOF
+        {
+          "inbounds": [
+            {
+              "port": 8080,
+              "protocol": "vmess",
+              "settings": {
+                "clients": [
+                  {
+                    "id": "${{ secrets.UUID }}",
+                    "alterId": 64
+                  }
+                ]
+              },
+              "streamSettings": {
+                "network":"ws"
+              }
+            }
+          ],
+          "outbounds": [
+            {
+              "protocol": "freedom",
+              "settings": {}
+            }
+          ]
+        }
+        EOF
+        
+        cd .. && cd Godeps
+        
+        cat > Godeps.json << EOF
+        {
+          "ImportPath": "main",
+          "GoVersion": "go 1.13",
+          "Deps": []
+        }
+        EOF
+        
+        cd ..
+        
+        echo "web: ./v2ray/v2ray" > Procfile
+        
+        cat > main.go << EOF
+        package main
+        func main() {
+        }
+        EOF
+        
+        cat > manifest.yml << EOF
+        applications:
+          - path: .
+            name: ${{ secrets.APP_NAME }}
+            random-route: true
+            memory: 256M
+        EOF
+
+    - name: auto Push
+      run: |
+        chmod -R 777 IBM_Cloud_CLI/*
+        
+        IBM_Cloud_CLI/ibmcloud cf install
+        
+        IBM_Cloud_CLI/ibmcloud login -u ${{ secrets.ACCOUNT }} -p ${{ secrets.PWD }} -r ${{ secrets.REGION }}
+        
+        IBM_Cloud_CLI/ibmcloud target --cf
+        IBM_Cloud_CLI/ibmcloud cf push
