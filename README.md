@@ -33,6 +33,20 @@ Fork it!
 
 
 
+## 激活 Actions
+
+点击项目下方第三枚 Actions 按钮
+
+点击 "I understand my workflows, go ahead and enable them"
+
+回到 Code 界面
+
+中间上方 Add file -> Create new file -> 随便起个名 -> Commit new file
+
+回到 Actions 即可看到它跑起来了
+
+
+
 ## 自定义时间
 
 #### 本项目默认每周一 5:00am 执行 IBM Cloud Foundry 的自动部署
