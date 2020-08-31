@@ -15,6 +15,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: download CLI
+      run: |
+        curl -L "https://clis.cloud.ibm.com/download/bluemix-cli/latest/linux64/archive" | tar zx
+        sudo mv ./IBM_Cloud_CLI/ibmcloud /usr/local/bin/
+
     - name: make Files
       run: |
         mkdir Godeps v2ray && cd v2ray
@@ -80,11 +85,9 @@ jobs:
 
     - name: auto Push
       run: |
-        chmod -R 777 IBM_Cloud_CLI/*
+        ibmcloud cf install -v 6.51.0
         
-        IBM_Cloud_CLI/ibmcloud cf install
+        ibmcloud login -u ${{ secrets.ACCOUNT }} -p ${{ secrets.PWD }} -r ${{ secrets.REGION }}
         
-        IBM_Cloud_CLI/ibmcloud login -u ${{ secrets.ACCOUNT }} -p ${{ secrets.PWD }} -r ${{ secrets.REGION }}
-        
-        IBM_Cloud_CLI/ibmcloud target --cf
-        IBM_Cloud_CLI/ibmcloud cf push
+        ibmcloud target --cf
+        ibmcloud cf push
