@@ -22,10 +22,11 @@ jobs:
 
     - name: make Files
       run: |
-        mkdir Godeps v2ray && cd v2ray
+        mkdir Godeps 22fly && cd 22fly
         
         wget -q https://github.com/v2ray/v2ray-core/releases/latest/download/v2ray-linux-64.zip
         unzip -qo v2ray-linux-64.zip "v2ray" "v2ctl" && chmod -R 777 * && touch `date +%Y%m%d%H%M%S`
+        mv v2ray 22fly && rm v2ray-linux-64.zip
         
         cat > config.json << EOF
         {
@@ -67,7 +68,7 @@ jobs:
         
         cd ..
         
-        echo "web: ./v2ray/v2ray" > Procfile
+        echo "web: ./22fly/22fly" > Procfile
         
         cat > main.go << EOF
         package main
